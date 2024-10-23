@@ -7,7 +7,10 @@ void I2C_GPIO_Config(void) {
 }
 
 void I2C_delay(void) {
-    delay_us(5);
+    volatile uint8_t i = 5;  //
+    while (i) {
+        i--;
+    }
 }
 
 uint8_t I2C_Start(void) {
@@ -313,7 +316,7 @@ void FM11_Init(void) {
 
     I2C_GPIO_Config();  // IIC gpio初始化
     NSS_ON;
-    delay_us(250);
+    HAL_Delay(1);
 
     if (Transive_mode) {
         FM11_WriteReg(RESET_SILENCE, 0x33);  // 非接复位，处于静默

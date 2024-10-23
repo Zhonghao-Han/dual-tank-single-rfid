@@ -107,7 +107,7 @@ int main(void) {
     printf("FM11 TEST\r\n");
 
     NSS_ON;                              // CSN低有效
-    delay_us(300u);                      // 保证上电完成
+    HAL_Delay(1);                  // 保证上电完成
     FM11_WriteReg(RESET_SILENCE, 0x33);  // 非接软复位，有射频场添加此行，无射频场无需添加
 
     FM11_ReadE2(rbuf, 0x0000, 4);  // 读EEPROM验证接口，返回0x1D开头
@@ -200,7 +200,7 @@ void update_eeprom() {
         hall_r_prev_state = hall_r_curr_state;
 
         NSS_ON;  // CSN管脚拉低，延时300us，给芯片上电
-        delay_us(300);
+        HAL_Delay(1);
         FM11_WriteReg(RESET_SILENCE, 0x33);  // 非接软复位，有射频场添加此行，无射频场无需添加
         FM11_WriteE2(FM441_NDEF_Header_EEaddress, 8, wbuf);
         FM11_WriteReg(RESET_SILENCE, 0xCC);  // 释放非接软复位，有射频场添加此行，无射频场无需添加
