@@ -17,6 +17,8 @@ typedef struct {
 
 void run_periodically(periodic_task_t *task);
 
+void delay_us(uint32_t us);
+
 #ifdef __cplusplus
 }
 #endif

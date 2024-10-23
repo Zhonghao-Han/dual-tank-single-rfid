@@ -3,7 +3,7 @@
 #define FM11_DEMO_H
 
 
-#include "IIC.h"
+#include "iic.h"
 #include "stdint.h"
 #include "string.h"
 

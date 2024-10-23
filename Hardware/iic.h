@@ -1,24 +1,22 @@
 #ifndef _IIC_H_
 #define _IIC_H_
  
-#include "systick.h"
-#include "stm32f10x_i2c.h"
-#include "usart1.h"
+#include "main.h"
 
 #define I2C_SLAVE_ADDRESS7	 0xAE	  //默认1010 111 如果采用硬件iic是0x57
 #define sEE_PAGESIZE    16
 
-#define SCL_H         GPIOB->BSRR = GPIO_Pin_10
-#define SCL_L         GPIOB->BRR  = GPIO_Pin_10
+#define SCL_H         (I2C_SCL_GPIO_Port->BSRR = I2C_SCL_Pin)
+#define SCL_L         (I2C_SCL_GPIO_Port->BRR  = I2C_SCL_Pin)
    
-#define SDA_H         GPIOB->BSRR = GPIO_Pin_11 
-#define SDA_L         GPIOB->BRR  = GPIO_Pin_11
+#define SDA_H         (I2C_SDA_GPIO_Port->BSRR = I2C_SDA_Pin) 
+#define SDA_L         (I2C_SDA_GPIO_Port->BRR  = I2C_SDA_Pin)
 
-#define SCL_read      GPIOB->IDR  & GPIO_Pin_10
-#define SDA_read      GPIOB->IDR  & GPIO_Pin_11
+#define SCL_read      (I2C_SCL_GPIO_Port->IDR  & I2C_SCL_Pin)
+#define SDA_read      (I2C_SDA_GPIO_Port->IDR  & I2C_SDA_Pin)
 
-#define NSS_OFF       GPIOB->BSRR = GPIO_Pin_12
-#define NSS_ON        GPIOB->BRR  = GPIO_Pin_12  //低电平
+#define NSS_OFF       (CSN_GPIO_Port->BSRR = CSN_Pin)
+#define NSS_ON        (CSN_GPIO_Port->BRR  = CSN_Pin)  //低电平
 
 /* FM327 reg for I2C */
 #define FM327_FIFO					0xFFF0
@@ -86,8 +84,8 @@
 #define TRUE   1
 
 
-#define Tag_mode        0//定义走通道芯片，Tag_mode和Transive_mode 不能同时为1
-#define Transive_mode   1//定义走tag芯片，Tag_mode和Transive_mode 不能同时为1
+#define Tag_mode        1//定义走通道芯片，Tag_mode和Transive_mode 不能同时为1
+#define Transive_mode   0//定义走tag芯片，Tag_mode和Transive_mode 不能同时为1
 #define Enable_AUTH     0//定义非接读写EEPROM需不需要AUTH认证
 
 void I2C_GPIO_Config(void);

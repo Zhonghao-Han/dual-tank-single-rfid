@@ -21,7 +21,7 @@
 #include "usart.h"
 
 /* USER CODE BEGIN 0 */
-
+#include "string.h"
 /* USER CODE END 0 */
 
 UART_HandleTypeDef huart2;
@@ -112,5 +112,9 @@ void HAL_UART_MspDeInit(UART_HandleTypeDef* uartHandle)
 }
 
 /* USER CODE BEGIN 1 */
-
+int __io_putchar(int ch)
+{
+    HAL_UART_Transmit(&huart2, (uint8_t *)&ch, 1, 1000);
+    return ch;
+}
 /* USER CODE END 1 */

@@ -54,6 +54,8 @@ void Error_Handler(void);
 
 /* USER CODE BEGIN EFP */
 void led_blink();
+
+void update_eeprom();
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
@@ -73,7 +75,7 @@ void led_blink();
 #define I2C_SDA_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
-
+extern uint8_t hall_state_changed;
 /* USER CODE END Private defines */
 
 #ifdef __cplusplus
