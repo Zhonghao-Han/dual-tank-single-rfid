@@ -26,7 +26,6 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "FM11_demo.h"
 #include "stdio.h"
 #include "utility.h"
 /* USER CODE END Includes */
@@ -38,7 +37,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-
+#define  FM441_NDEF_Header_EEaddress              0x010 
+#define RESET_SILENCE			0xFFE6
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -109,7 +109,7 @@ int main(void) {
 
     HAL_GPIO_WritePin(CSN_GPIO_Port, CSN_Pin, GPIO_PIN_RESET);
     HAL_Delay(1);
-    HAL_I2C_Mem_Write(&hi2c1, FM11_I2C_ADDRESS, FM441_NDEF_Header_EEaddress, I2C_MEMADD_SIZE_16BIT, &wbuf, 16,
+    HAL_I2C_Mem_Write(&hi2c1, FM11_I2C_ADDRESS, FM441_NDEF_Header_EEaddress, I2C_MEMADD_SIZE_16BIT, wbuf, 16,
                       100);
     HAL_StatusTypeDef state =
         HAL_I2C_Mem_Read(&hi2c1, FM11_I2C_ADDRESS, FM441_NDEF_Header_EEaddress, I2C_MEMADD_SIZE_16BIT, rbuf, 16, 1000);
@@ -205,7 +205,7 @@ void update_eeprom() {
         HAL_GPIO_WritePin(CSN_GPIO_Port, CSN_Pin, GPIO_PIN_RESET);
         HAL_Delay(1);
         silence();
-        HAL_I2C_Mem_Write(&hi2c1, FM11_I2C_ADDRESS, FM441_NDEF_Header_EEaddress, I2C_MEMADD_SIZE_16BIT, &wbuf,
+        HAL_I2C_Mem_Write(&hi2c1, FM11_I2C_ADDRESS, FM441_NDEF_Header_EEaddress, I2C_MEMADD_SIZE_16BIT, wbuf,
                           16, 1000);
         un_silience();
         HAL_Delay(1);
