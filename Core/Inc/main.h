@@ -56,6 +56,10 @@ void Error_Handler(void);
 void led_blink();
 
 void update_eeprom();
+
+void silence();
+
+void un_silience();
 /* USER CODE END EFP */
 
 /* Private defines -----------------------------------------------------------*/
