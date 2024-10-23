@@ -69,10 +69,6 @@ void update_eeprom();
 #define IRQ_GPIO_Port GPIOA
 #define CSN_Pin GPIO_PIN_3
 #define CSN_GPIO_Port GPIOB
-#define I2C_SCL_Pin GPIO_PIN_6
-#define I2C_SCL_GPIO_Port GPIOB
-#define I2C_SDA_Pin GPIO_PIN_7
-#define I2C_SDA_GPIO_Port GPIOB
 
 /* USER CODE BEGIN Private defines */
 extern uint8_t hall_state_changed;
