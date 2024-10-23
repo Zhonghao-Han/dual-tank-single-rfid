@@ -20,19 +20,20 @@
 #include "main.h"
 
 #include "gpio.h"
+#include "i2c.h"
 #include "tim.h"
 #include "usart.h"
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
-#include "stdio.h"
 #include "FM11_demo.h"
+#include "stdio.h"
 #include "utility.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
 /* USER CODE BEGIN PTD */
-
+#define FM11_I2C_ADDRESS (0xAE)
 /* USER CODE END PTD */
 
 /* Private define ------------------------------------------------------------*/
@@ -55,8 +56,8 @@ GPIO_PinState hall_r_prev_state = GPIO_PIN_RESET;
 periodic_task_t led_blink_ctr = {0, 500u, led_blink};
 periodic_task_t update_eeprom_ctr = {0, 250u, update_eeprom};
 
-uint8_t  rbuf[16] = {};  // 测试BUF
-uint8_t  wbuf[16] = {'L', ':', '0', 'R', ':', '0', 'S', 'p', 'r', 'i', 'n', 't', 'R', 'a', 'y', '\0'};
+uint8_t rbuf[16] = {};  // 测试BUF
+uint8_t wbuf[16] = {'L', ':', '0', 'R', ':', '0', 'S', 'p', 'r', 'i', 'n', 't', 'R', 'a', 'y', '\0'};
 
 /* USER CODE END PV */
 
@@ -100,26 +101,42 @@ int main(void) {
     MX_GPIO_Init();
     MX_USART2_UART_Init();
     MX_TIM2_Init();
+    MX_I2C1_Init();
     /* USER CODE BEGIN 2 */
 
-    FM11_Init();
+    // FM11_Init();
 
     printf("FM11 TEST\r\n");
 
-    NSS_ON;                              // CSN低有效
-    delay_us(300u);                      // 保证上电完成
-    FM11_WriteReg(RESET_SILENCE, 0x33);  // 非接软复位，有射频场添加此行，无射频场无需添加
+    NSS_ON;
+    HAL_GPIO_WritePin(CSN_GPIO_Port, CSN_Pin, GPIO_PIN_RESET);
+    HAL_Delay(1);
+    HAL_StatusTypeDef state =
+        HAL_I2C_Mem_Read(&hi2c1, FM11_I2C_ADDRESS, 0x0000, I2C_MEMADD_SIZE_16BIT, rbuf, 4, 1000);
+    if (state != HAL_OK) {
+        while (1) {
+            led_blink_ctr.period = 100;
+            run_periodically(&led_blink_ctr);
+        }
+    }
 
-    FM11_ReadE2(rbuf, 0x0000, 4);  // 读EEPROM验证接口，返回0x1D开头
+    HAL_Delay(1);  // 很�?�?，�?�?时间
+    HAL_GPIO_WritePin(CSN_GPIO_Port, CSN_Pin, GPIO_PIN_SET);
+    NSS_OFF;  // CSN管脚拉高
+
+    delay_us(300u);                      // �?�?上电完�?
+    FM11_WriteReg(RESET_SILENCE, 0x33);  // �?�接软�?�?，有射频场添加此行，无射频场无需添加
+
+    FM11_ReadE2(rbuf, 0x0000, 4);  // 读EEPROM验�?接�?�，返回0x1D开头
     printf("Serial Number: %02X %02X %02X %02X \r\n", rbuf[0], rbuf[1], rbuf[2], rbuf[3]);
 
     FM11_WriteE2(FM441_NDEF_Header_EEaddress, 16, wbuf);  // 验�?eeprom的读写属性
     FM11_ReadE2(rbuf, FM441_NDEF_Header_EEaddress, 16);   // 验�?eeprom的读写属性
     printf("State: %s\r\n", rbuf);
 
-    FM11_WriteReg(RESET_SILENCE, 0xCC);  // 释放非接软复位，有射频场添加此行，无射频场无需添加
+    FM11_WriteReg(RESET_SILENCE, 0xCC);  // 释放�?�接软�?�?，有射频场添加此行，无射频场无需添加
 
-    HAL_Delay(1);  // 很重要，复位时间
+    HAL_Delay(1);  // 很�?�?，�?�?时间
     NSS_OFF;       // CSN管脚拉高
 
     /* USER CODE END 2 */
@@ -176,8 +193,9 @@ void SystemClock_Config(void) {
     if (HAL_RCC_ClockConfig(&RCC_ClkInitStruct, FLASH_LATENCY_1) != HAL_OK) {
         Error_Handler();
     }
-    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2;
+    PeriphClkInit.PeriphClockSelection = RCC_PERIPHCLK_USART2 | RCC_PERIPHCLK_I2C1;
     PeriphClkInit.Usart2ClockSelection = RCC_USART2CLKSOURCE_PCLK1;
+    PeriphClkInit.I2c1ClockSelection = RCC_I2C1CLKSOURCE_PCLK1;
     if (HAL_RCCEx_PeriphCLKConfig(&PeriphClkInit) != HAL_OK) {
         Error_Handler();
     }
@@ -201,10 +219,10 @@ void update_eeprom() {
 
         NSS_ON;  // CSN管脚拉低，延时300us，给芯片上电
         delay_us(300);
-        FM11_WriteReg(RESET_SILENCE, 0x33);  // 非接软复位，有射频场添加此行，无射频场无需添加
+        FM11_WriteReg(RESET_SILENCE, 0x33);  // �?�接软�?�?，有射频场添加此行，无射频场无需添加
         FM11_WriteE2(FM441_NDEF_Header_EEaddress, 8, wbuf);
-        FM11_WriteReg(RESET_SILENCE, 0xCC);  // 释放非接软复位，有射频场添加此行，无射频场无需添加
-        HAL_Delay(1);                        // 很重要，复位时间
+        FM11_WriteReg(RESET_SILENCE, 0xCC);  // 释放�?�接软�?�?，有射频场添加此行，无射频场无需添加
+        HAL_Delay(1);                        // 很�?�?，�?�?时间
         NSS_OFF;                             // CSN管脚拉高
 
         printf("State: %s\r\n", wbuf);
