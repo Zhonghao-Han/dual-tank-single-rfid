@@ -60,9 +60,6 @@ periodic_task_t update_eeprom_ctr = {0, 250u, update_eeprom};
 uint8_t read_buf[16] = {};  // 测试BUF
 uint8_t write_buf[16] = {'L', ':', '0', 'R', ':', '0', 'S', 'p', 'r', 'i', 'n', 't', 'R', 'a', 'y', '\0'};
 
-GPIO_PinState hall_l_curr_state = GPIO_PIN_RESET;
-GPIO_PinState hall_r_curr_state = GPIO_PIN_RESET;
-
 /* USER CODE END PV */
 
 /* Private function prototypes -----------------------------------------------*/
@@ -193,8 +190,8 @@ void led_blink() {
 }
 
 void update_eeprom() {
-    // GPIO_PinState hall_l_curr_state = HAL_GPIO_ReadPin(HALL_L_GPIO_Port, HALL_L_Pin);
-    // GPIO_PinState hall_r_curr_state = HAL_GPIO_ReadPin(HALL_R_GPIO_Port, HALL_R_Pin);
+    GPIO_PinState hall_l_curr_state = HAL_GPIO_ReadPin(HALL_L_GPIO_Port, HALL_L_Pin);
+    GPIO_PinState hall_r_curr_state = HAL_GPIO_ReadPin(HALL_R_GPIO_Port, HALL_R_Pin);
 
     if (hall_l_curr_state != hall_l_prev_state || hall_r_curr_state != hall_r_prev_state) {
         write_buf[2] = '0' + hall_l_curr_state;
