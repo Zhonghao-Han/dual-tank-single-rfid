@@ -26,9 +26,9 @@
 
 /* Private includes ----------------------------------------------------------*/
 /* USER CODE BEGIN Includes */
+#include "fm11.h"
 #include "stdio.h"
 #include "utility.h"
-#include "fm11.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -38,8 +38,8 @@
 
 /* Private define ------------------------------------------------------------*/
 /* USER CODE BEGIN PD */
-#define  FM441_NDEF_Header_EEaddress              0x010 
-#define RESET_SILENCE			0xFFE6
+#define FM441_NDEF_Header_EEaddress 0x010
+#define RESET_SILENCE 0xFFE6
 /* USER CODE END PD */
 
 /* Private macro -------------------------------------------------------------*/
@@ -57,8 +57,11 @@ GPIO_PinState hall_r_prev_state = GPIO_PIN_RESET;
 periodic_task_t led_blink_ctr = {0, 500u, led_blink};
 periodic_task_t update_eeprom_ctr = {0, 250u, update_eeprom};
 
-uint8_t rbuf[16] = {};  // 测试BUF
-uint8_t wbuf[16] = {'L', ':', '0', 'R', ':', '0', 'S', 'p', 'r', 'i', 'n', 't', 'R', 'a', 'y', '\0'};
+uint8_t read_buf[16] = {};  // 测试BUF
+uint8_t write_buf[16] = {'L', ':', '0', 'R', ':', '0', 'S', 'p', 'r', 'i', 'n', 't', 'R', 'a', 'y', '\0'};
+
+GPIO_PinState hall_l_curr_state = GPIO_PIN_RESET;
+GPIO_PinState hall_r_curr_state = GPIO_PIN_RESET;
 
 /* USER CODE END PV */
 
@@ -110,26 +113,12 @@ int main(void) {
 
     FM11_init();
 
-    uint8_t user_1 = FM11_read_reg(0xFFE1);
-
-    printf("%d", user_1);
-
-    HAL_GPIO_WritePin(CSN_GPIO_Port, CSN_Pin, GPIO_PIN_RESET);
-    HAL_Delay(1);
-    HAL_I2C_Mem_Write(&hi2c1, FM11_I2C_ADDRESS, FM441_NDEF_Header_EEaddress, I2C_MEMADD_SIZE_16BIT, wbuf, 16,
-                      100);
-    HAL_StatusTypeDef state =
-        HAL_I2C_Mem_Read(&hi2c1, FM11_I2C_ADDRESS, FM441_NDEF_Header_EEaddress, I2C_MEMADD_SIZE_16BIT, rbuf, 16, 1000);
-    if (state != HAL_OK) {
-        while (1) {
-            led_blink_ctr.period = 100;
-            run_periodically(&led_blink_ctr);
-        }
-    }
-
-    HAL_Delay(1);
-    printf("State: %s\r\n", rbuf);
-    HAL_GPIO_WritePin(CSN_GPIO_Port, CSN_Pin, GPIO_PIN_SET);
+    FM11_enable();
+    FM11_silence();
+    FM11_write_eeprom_page(FM11_USER_DATA_START_EEPROM, write_buf, 16);
+    FM11_read_eeprom_page(FM11_USER_DATA_START_EEPROM, read_buf, 16);
+    FM11_unsilence();
+    FM11_disable();
 
     /* USER CODE END 2 */
 
@@ -195,9 +184,8 @@ void SystemClock_Config(void) {
 
 /* USER CODE BEGIN 4 */
 
-void FN11_init(){
+void FN11_init() {
     silence();
-
 }
 
 void led_blink() {
@@ -205,26 +193,22 @@ void led_blink() {
 }
 
 void update_eeprom() {
-    GPIO_PinState hall_l_curr_state = HAL_GPIO_ReadPin(HALL_L_GPIO_Port, HALL_L_Pin);
-    GPIO_PinState hall_r_curr_state = HAL_GPIO_ReadPin(HALL_R_GPIO_Port, HALL_R_Pin);
+    // GPIO_PinState hall_l_curr_state = HAL_GPIO_ReadPin(HALL_L_GPIO_Port, HALL_L_Pin);
+    // GPIO_PinState hall_r_curr_state = HAL_GPIO_ReadPin(HALL_R_GPIO_Port, HALL_R_Pin);
 
     if (hall_l_curr_state != hall_l_prev_state || hall_r_curr_state != hall_r_prev_state) {
-        wbuf[2] = '0' + hall_l_curr_state;
-        wbuf[5] = '0' + hall_r_curr_state;
+        write_buf[2] = '0' + hall_l_curr_state;
+        write_buf[5] = '0' + hall_r_curr_state;
 
         hall_l_prev_state = hall_l_curr_state;
         hall_r_prev_state = hall_r_curr_state;
 
-        HAL_GPIO_WritePin(CSN_GPIO_Port, CSN_Pin, GPIO_PIN_RESET);
-        HAL_Delay(1);
-        silence();
-        HAL_I2C_Mem_Write(&hi2c1, FM11_I2C_ADDRESS, FM441_NDEF_Header_EEaddress, I2C_MEMADD_SIZE_16BIT, wbuf,
-                          16, 1000);
-        un_silience();
-        HAL_Delay(1);
-        HAL_GPIO_WritePin(CSN_GPIO_Port, CSN_Pin, GPIO_PIN_SET);
-
-        printf("State: %s\r\n", wbuf);
+        FM11_enable();
+        FM11_silence();
+        FM11_write_eeprom_page(FM11_USER_DATA_START_EEPROM, write_buf, 16);
+        FM11_read_eeprom_page(FM11_USER_DATA_START_EEPROM, read_buf, 16);
+        FM11_unsilence();
+        FM11_disable();
     }
 }
 

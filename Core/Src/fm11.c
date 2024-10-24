@@ -3,19 +3,16 @@
 #include "i2c.h"
 #include "main.h"
 
-#define FM11_DEVICE_ADDRESS 0xAE  // shifted address required by ST HAL
-#define FM11_RESET_SILENCE_REG 0xFFE6
-#define FM11_RF_TXEN_REG 0xFFF4
-
-#define FM11_SAK2_EEPROM 0x03BF
-#define FM11_USER_CFG_EEPROM 0x0390
-
 uint8_t sak2[1] = {0x00};
 uint8_t user_cfg[4] = {0x90, 0x84, 0x21, 0xCA};
 
-void FM11_write_eeprom_page(uint16_t addr, uint8_t* value, uint8_t len) {
-    HAL_I2C_Mem_Write(&hi2c1, FM11_DEVICE_ADDRESS, addr, I2C_MEMADD_SIZE_16BIT, value, len, 100);
+void FM11_write_eeprom_page(uint16_t addr, uint8_t* data, uint8_t len) {
+    HAL_I2C_Mem_Write(&hi2c1, FM11_DEVICE_ADDRESS, addr, I2C_MEMADD_SIZE_16BIT, data, len, 100);
     HAL_Delay(10);  // waiting for EEPROM operation
+}
+
+void FM11_read_eeprom_page(uint16_t addr, uint8_t* data, uint8_t len) {
+    HAL_I2C_Mem_Read(&hi2c1, FM11_DEVICE_ADDRESS, addr, I2C_MEMADD_SIZE_16BIT, data, len, 100);
 }
 
 void FM11_write_reg(uint16_t addr, uint8_t value) {
