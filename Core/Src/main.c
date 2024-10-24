@@ -28,6 +28,7 @@
 /* USER CODE BEGIN Includes */
 #include "stdio.h"
 #include "utility.h"
+#include "fm11.h"
 /* USER CODE END Includes */
 
 /* Private typedef -----------------------------------------------------------*/
@@ -106,6 +107,12 @@ int main(void) {
 
     HAL_GPIO_WritePin(CSN_GPIO_Port, CSN_Pin, GPIO_PIN_SET);
     HAL_Delay(100);
+
+    FM11_init();
+
+    uint8_t user_1 = FM11_read_reg(0xFFE1);
+
+    printf("%d", user_1);
 
     HAL_GPIO_WritePin(CSN_GPIO_Port, CSN_Pin, GPIO_PIN_RESET);
     HAL_Delay(1);
@@ -187,6 +194,12 @@ void SystemClock_Config(void) {
 }
 
 /* USER CODE BEGIN 4 */
+
+void FN11_init(){
+    silence();
+
+}
+
 void led_blink() {
     HAL_GPIO_TogglePin(LED_GPIO_Port, LED_Pin);
 }

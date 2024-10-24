@@ -57,6 +57,8 @@ void led_blink();
 
 void update_eeprom();
 
+void FN11_init();
+
 void silence();
 
 void un_silience();

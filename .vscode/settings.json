@@ -2,6 +2,7 @@
     "files.associations": {
         "main.h": "c",
         "utility.h": "c",
-        "tim.h": "c"
+        "tim.h": "c",
+        "gpio.h": "c"
     }
 }
